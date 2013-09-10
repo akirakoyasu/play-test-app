@@ -41,13 +41,11 @@ object BasicAuthFilter extends Filter {
 
   override def apply(next: RequestHeader => Result)(request: RequestHeader): Result = {
     request.headers.get(HttpHeaders.AUTHORIZATION) match {
-      case None =>
-        Results.Unauthorized
-          .withHeaders((HttpHeaders.WWW_AUTHENTICATE, REALM))
       case Some(AUTH_TOKEN) =>
         next(request)
       case _ =>
         Results.Unauthorized
+          .withHeaders((HttpHeaders.WWW_AUTHENTICATE, REALM))
     }
   }
 }
