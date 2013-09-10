@@ -9,8 +9,6 @@ import play.api.Play.current
 
 /**
  * Author: Akira Koyasu <mail@akirakoyasu.net>
- * Date: 2013/09/08
- * Time: 23:53
  */
 object AuthorizedFilter extends Filter {
 
@@ -31,8 +29,8 @@ object AuthorizedFilter extends Filter {
 
 object BasicAuthFilter extends Filter {
   private val REALM = "Basic realm=\"Enter your login ID and password, please.\""
-  private val USER = "user"
-  private val PASSWORD = "password"
+  private val USER = "happy"
+  private val PASSWORD = "staging"
 
   private lazy val AUTH_TOKEN = {
     val credentials = USER + ":" + PASSWORD
@@ -42,17 +40,14 @@ object BasicAuthFilter extends Filter {
   }
 
   override def apply(next: RequestHeader => Result)(request: RequestHeader): Result = {
-    val authHeader = request.headers.get(HttpHeaders.AUTHORIZATION)
-
-    if (authHeader.isEmpty) {
-      return Results.Unauthorized
-        .withHeaders((HttpHeaders.WWW_AUTHENTICATE, REALM))
-    }
-
-    if (authHeader.get == AUTH_TOKEN) {
-      next(request)
-    } else {
-      Results.Unauthorized
+    request.headers.get(HttpHeaders.AUTHORIZATION) match {
+      case None =>
+        Results.Unauthorized
+          .withHeaders((HttpHeaders.WWW_AUTHENTICATE, REALM))
+      case Some(AUTH_TOKEN) =>
+        next(request)
+      case _ =>
+        Results.Unauthorized
     }
   }
 }
